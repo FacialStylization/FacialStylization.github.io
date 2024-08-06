@@ -1,7 +1,7 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>ConstFS</title>
+<title>ConstFS: Controlled and Stable Face Stylization with High Identity-Preserved</title>
 <link href="./DreamBooth_files/style.css" rel="stylesheet">
 <script type="text/javascript" src="./DreamBooth_files/jquery.mlens-1.0.min.js"></script> 
 <script type="text/javascript" src="./DreamBooth_files/jquery.js"></script>
@@ -9,14 +9,13 @@
 
 <body>
 <div class="content">
-  <h1><strong>ConstFS:Controlled and Stable Face Stylization with High Identity-Preserved</strong></h1>
-  <p id="authors"><span><a href="https://facialstylization.github.io/"></a></span><a href="https://facialstylization.github.io/">Face Stylization</a> <br>
-    <br>
-  <span style="font-size: 24px">Face Stylization
+  <h1><strong>ConstFS: Controlled and Stable Face Stylization with High Identity-Preserved</strong></h1>
+  <p id="authors"><span></span>First Author, Second Author, Third Author<br>
+  <span style="font-size: 24px">Princeton University, Springer Heidelberg, ABC Institute
   </span></p>
   <br>
   <img src="./DreamBooth_files/teaser_static.jpg" class="teaser-gif" style="width:100%;"><br>
-  <h3 style="text-align:center"><em>It's a face stylization.</em></h3>
+  <h3 style="text-align:center"><em>Ensuring precise style control while preserving facial features...</em></h3>
     <font size="+2">
           <p style="text-align: center;">
             <a href="https://arxiv.org/abs/2208.12242" target="_blank">[Paper]</a> &nbsp;&nbsp;&nbsp;&nbsp;
@@ -27,56 +26,149 @@
 </div>
 <div class="content">
   <h2 style="text-align:center;">Abstract</h2>
-  <p>Large text-to-image models achieved a remarkable leap in the evolution of AI, enabling high-quality and diverse synthesis of images from a given text prompt. However, these models lack the ability to mimic the appearance of subjects in a given reference set and synthesize novel renditions of them in different contexts. In this work, we present a new approach for "personalization" of text-to-image diffusion models (specializing them to users' needs). Given as input just a few images of a subject, we fine-tune a pretrained text-to-image model (Imagen, although our method is not limited to a specific model) such that it learns to bind a unique identifier with that specific subject. Once the subject is embedded in the output domain of the model, the unique identifier can then be used to synthesize fully-novel photorealistic images of the subject contextualized in different scenes. By leveraging the semantic prior embedded in the model with a new autogenous class-specific prior preservation loss, our technique enables synthesizing the subject in diverse scenes, poses, views, and lighting conditions that do not appear in the reference images. We apply our technique to several previously-unassailable tasks, including subject recontextualization, text-guided view synthesis, appearance modification, and artistic rendering (all while preserving the subject's key features).</p>
+  <p>In the field of image processing, style transfer and content generation are current research hotspots. This paper explores methods for effective content-preserving style transfer based on controlled generation models such as ControlNet and IP-Adapter. By injecting style and content features into specific attention layers using IP-Adapter, precise control over image style is achieved while preserving layout and original content. Despite these advancements in image generation quality, several challenges remain in practical applications. For instance, inversion techniques can lead to style degradation during the image generation process. Moreover, there is a trade-off between style intensity and content consistency. Therefore, it is necessary to meticulously adjust the weights of each reference image to balance style intensity and text controllability. This study aims to analyze these limitations in detail and explore how to improve these technologies through optimization algorithms and enhanced data processing capabilities. Our proposed method, ConstFS, addresses these challenges by effectively balancing style transfer and facial feature preservation, achieving superior performance compared to existing methods. Through qualitative and quantitative comparisons, our method demonstrates improved style consistency and content retention, offering a robust solution for identity-preserved portrait generation.</p>
 </div>
 <div class="content">
-  <h2>Background</h2>
-  <p> Given a particular subject such as clock (shown in the real images on the left), it is very challenging to generate it in different contexts with state-of-the-art text-to-image models, while maintaining high fidelity to its key visual features. Even with dozens of iterations over a text prompt that contains a detailed description of the appearance of the clock (<em>"retro style yellow alarm clock with a white clock face and a yellow number three on the right part of the clock face in the jungle"</em>), the Imagen model [Saharia et al., 2022] can't reconstruct its key visual features (third column). Furthermore, even models whose text embedding lies in a shared language-vision space and can create semantic variations of the image, such as DALL-E2 [Ramesh et al., 2022], can neither reconstruct the appearance of the given subject nor modify the context (second column). In contrast, our approach (right) can synthesize the clock with high fidelity and in new contexts (<em>"a [V] clock in the jungle"</em>).</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/background.png" style="width:100%;"> <br>
+  <h2>Introduction</h2>
+  <p>In the field of image processing, style transfer and content generation are current research hotspots. Facial stylization faces significant challenges, including content loss and style degradation. Existing StyleGAN-based methods often overly emphasize style features, leading to a neglect of content consistency. Additionally, these methods may cause facial feature distortion and color leakage. On the other hand, Stable Diffusion-based methods typically use techniques like style inversion to input style, which can lead to style degradation and color leakage.</p>
+  <p>Although GAN-based and StyleGAN-based facial style transfer techniques have made significant progress, they still have several limitations. In terms of preserving style features, GAN-based methods such as AnimeGAN and APDrawingGAN can lead to the loss or degradation of style features in complex scenes. Similarly, StyleGAN-NADA struggles to reproduce all style details during zero-shot transfer. StyleGAN-based methods like DualStyleGAN and BlendGAN may cause content erosion and simplification of facial features when handling structural and identity characteristics. Moreover, methods like MTG, JoJoGAN, DualStyleGAN, StarGAN, and AniGAN tend to produce distorted facial features, unnatural artifacts, and face challenges in balancing content and style during style conversion. In summary, while these methods are effective in specific scenarios, they still require optimization in terms of style preservation, content protection, and domain adaptability.</p>
+  <p>In recent years, diffusion-based facial stylization techniques have rapidly developed. The mainstream methods can be categorized into inversion-based and injection-based approaches. Inversion-based methods, such as InST and Prospect, encounter issues with style degradation due to feature loss caused by adding noise to the style image during the style inversion process. On the other hand, methods like CreativeSynth, VCT, and PairCustomization inject features of the style image into the attention layers. Despite this, solely injecting features through attention layers can also result in feature loss due to deficiencies in the feature extraction method. Naturally, to address these issues, some methods strike a balance between the two approaches. For example, Portrait Diffusion encodes the image into latent codes using DDIM inversion and applies style attention control to blend content and style features in the attention space.</p>
+  <p>Current facial style transfer methods, such as style inversion and style injection, often lead to issues like content loss and style degradation. Traditional methods tend to lose facial content information during the style feature injection process, resulting in poor style consistency in the generated images. Additionally, these methods may cause facial feature distortion, color leakage, and overly strong styles that affect content consistency. To address these issues, we propose an innovative style transfer method that optimizes style injection.</p>
+  <p>Our method enhances traditional diffusion models with the following improvements: First, we adopt the style extraction component from InstantStyle as our Style Extractor. We also introduce the ID Encoder from PuLID to embed ID image features into the cross-attention layers, effectively preventing style information leakage and content information corruption. Second, we combine Visual Large Language Model (VLM) and Large Language Model (LLM) to optimize the alignment of text and image features, ensuring high consistency and uniformity between the generated images and the input text. Additionally, we use Qwen-VL-Plus to identify the type of style image and select the appropriate ControlNet based on the identification results, ensuring optimal processing for different input types. Finally, in the final stage of image generation, we merge style, content, and annotation features to ensure consistency and coordination of all injected features.</p>
+  <p>In summary, our contributions are threefold:
+  <ul>
+    <li><strong>Novel Input-Output Alignment:</strong> By using the Image Captioner, we optimize the alignment of input and output in terms of style and content, ensuring high consistency and uniformity between the generated images and the input images.</li>
+    <li><strong>ControlNet Selection Based on Image Type Recognition:</strong> Using VLM to identify the type of style image and selecting the corresponding ControlNet ensures optimal processing for different input types, achieving higher quality image generation and more consistent fusion of style and content features.</li>
+    <li><strong>Significant Experimental Results:</strong> Our method demonstrates superior performance in multiple experiments, effectively preserving facial features while accomplishing the style transfer task. The generated images exhibit significantly better consistency in style and content compared to existing methods.</li>
+  </ul>
+  </p>
 </div>
 <div class="content">
-  <h2>Approach</h2>
-  <p> Our method takes as input a few images (typically 3-5 images suffice, based on our experiments) of a subject (e.g., a specific dog) and the corresponding class name (e.g. "dog"), and returns a fine-tuned/"personalized'' text-to-image model that encodes a unique identifier that refers to the subject. Then, at inference, we can implant the unique identifier in different sentences to synthesize the subjects in difference contexts.</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/high_level.png" style="width:100%;"> <br>
-  <p>Given ~3-5 images of a subject we fine tune a text-to-image diffusion in two steps: (a) fine tuning the low-resolution text-to-image model with the input images paired with a text prompt containing a unique identifier and the name of the class the subject belongs to (e.g., "A photo of a [T] dog”), in parallel, we apply a class-specific prior preservation loss, which leverages the semantic prior that the model has on the class and encourages it to generate diverse instances belong to the subject's class by injecting the class name in the text prompt (e.g., "A photo of a dog”). (b) fine-tuning the super resolution components with pairs of low-resolution and high-resolution images taken from our input images set, which enables us to maintain high-fidelity to small details of the subject.</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/system.png" style="width:100%;"> <br>
+  <h2>Related Work</h2>
+  <h3>Diffusion models in controllable generation</h3>
+  <p>Since the introduction of Latent Diffusion models, the field of image generation and editing has seen rapid advancements, resulting in numerous state-of-the-art models and their derivative technologies. Notable examples in this domain include StyleDiffusion, AnimateDiff, and HunyuanDiT. In the realm of style transfer, diffusion-based methods such as StyleAligned, b-lora, and DEADiff have made significant progress. In recent years, the application of Attention Blocks for feature injection has become increasingly prevalent. Studies like StyleID, Z*, VSP, and CreativeSynth leverage attention blocks to achieve style transfer by injecting features.</p>
+  <p>With the progression of research, new methods such as InstantStyle and OSASIS have focused more on the purity and accuracy of style extraction by decoupling style structure from content. Given the remarkable performance of attention mechanisms in feature injection, our approach also adopts the injection of style features for facial stylization.</p>
+  <p>The release of ControlNet has spurred the development of various control models. Canny-type models and Depth-type models guide the generation process through edge detection and depth maps, respectively. Tencent AI Lab introduced the IP-Adapter technology, which achieves efficient controlled generation by injecting image features into the attention layers. Building on this, a series of ID injection models such as FaceID, InstantID, and PureID have emerged, continuously improving methods for feature extraction and injection while ensuring facial feature consistency. Drawing from the advantages of the IP-Adapter, our method balances style and content features in controlled generation models.</p>
+  <h3>Face Style Transfer</h3>
+  <p>In the field of Generative Adversarial Network (GAN)-based research, numerous techniques have been explored to achieve facial stylization. Since the introduction of AnimeGAN with its grayscale style loss, methods like DiFa and APDrawingGAN have employed global fine-tuning and multi-stage GAN architectures to achieve high-quality artistic style conversion. However, early models struggled to perfectly apply target styles while maintaining the identity features of the source image. StyleGAN and its derivative models, such as Won-Dong Jang et al., use shape exaggeration modules to generate realistic and detailed cartoons, supporting facial expression control. Shuai Yang, through hierarchically adjusting portrait styles via internal and external style paths and employing progressive fine-tuning, achieves high-quality portrait style transfer and flexible control, but both models still face limitations in handling structural complexity. BlendGAN and DoesFS utilizing StyleGAN, combine self-supervised encoding and visual transformation techniques to enable arbitrary style face generation and high-quality style transfer.</p>
+  <p>In diffusion-based methods, previous works can be categorized into two major approaches: inversion-based methods and injection-based methods. Zhang et al. first applied image inversion to the domain of facial style transfer, inputting style information through Textual Inversion and Stochastic Inversion. Following this, works such as CreativeSynth, VCT, and PortraitDiffusion adopted this strategy to enhance style transfer quality. Conversely, injection-based methods like PairCustomization, Osasis, and FreeStyle achieve style embedding by extracting image features and injecting them into feature layers. Yang et al. injects style features through contrastive loss, while FreeStyle injects style information via textual descriptions, modulating features from a dual-stream encoder. In contrast, our work introduces parallel cross-attention layers and optimizes ID customization and style injection methods, further enhancing the style consistency and content retention of generated images.</p>
 </div>
 <div class="content">
-  <h2>Results</h2>
-  <p>Results for re-contextualization of a bag and vase subject instances. By finetuning a model using our method we are able to generate different images of the a subject instance in different environments, with high preservation of subject details and realistic interaction between the scene and the subject. We display the conditioning prompts below each image. </p>
-<img class="summary-img" src="./DreamBooth_files/results.png" style="width:100%;">
+  <h2>Method</h2>
+  <p>This paper proposes an innovative facial style transfer method named <strong>ConstFS</strong>, as illustrated in Fig. 1. The pipeline overview of our <strong>ConstFS</strong> is shown on the left while the detail of the Image Captioner is on the right. Our method aims to achieve high-quality style transfer by precisely controlling the style and content of the generated images, ensuring superior visual effects. This approach integrates multiple advanced techniques:</p>
+  <ul>
+    <li><strong>Style Extraction:</strong> A style extractor captures the texture and structure features of the style image.</li>
+    <li><strong>ID Feature Extraction:</strong> An ID encoder extracts the identity features of the face.</li>
+    <li><strong>Text Feature Extraction:</strong> A combination of Visual Large Language Model (VLM) and Large Language Model (LLM) generates descriptive text features using specialized prompt templates.</li>
+    <li><strong>ControlNet Selection:</strong> An appropriate ControlNet is selected based on the characteristics of the style image.</li>
+    <li><strong>Feature Integration:</strong> All extracted features are injected into a UNet via the Stable Diffusion XL pipeline and IP-Adapter. This multi-level, multi-module collaborative mechanism ensures that our approach can generate highly consistent and high-quality images in style transfer tasks.</li>
+  </ul>
+  <h3>Style Extraction</h3>
+  <p>For a facial image \(I_c\), extract style features by differentiating between style images and style content. Specifically, the input style image \(I_s\) is processed through the CLIP model to obtain its feature representation. By utilizing the difference between the style image and content image features, we extract texture features \(F_t\) and structural features \(F_{st}\).</p>
+  <p><code>F_t, F_{st} = S_e(I_s)</code></p>
+  <p>Texture features are injected into the first layers of the up-sampling part of the UNet, while structural features are injected into the second layers of the down-sampling part. This approach effectively captures the unique texture and structural features of the style image, ensuring these features are preserved in the generated image.</p>
+  <h3>ID Feature Extraction</h3>
+  <p>To ensure the accuracy of facial features in the generated image, we use the ID Encoder proposed by PuLID for facial information extraction. The process involves inputting the content facial image \(I_c\) and extracting its ID features \(F_{id}\) using the ID Encoder \(ID_e\).</p>
+  <p><code>F_{id} = ID_e(I_c)</code></p>
+  <p>The extracted ID features are injected into every layer of the UNet, enhancing the personalization and consistency of facial ID features in the generated image. This method precisely captures facial characteristics, ensuring the generated image's facial features are realistic and credible.</p>
+  <h3>Text Feature Extraction</h3>
+  <p>We utilize a Visual Large Language Model (VLM) for text feature extraction. Using specialized prompt templates, the VLM labels the style image and content facial image, and the labeling results are fused to form a unified text feature representation \(F_{txt}\).</p>
+  <p><code>
+  \begin{aligned}
+  &prompt_s = VLM(PromptTemplate_1(I_s)) \\
+  &prompt_c = VLM(PromptTemplate_2(I_c)) \\
+  &F_{txt} = LLM(PromptTemplate_3(prompt_s, prompt_c))
+  \end{aligned}
+  </code></p>
+  <p>These text features are injected into every layer of the UNet, ensuring effective integration of style and content information. This approach combines text and image features, ensuring consistency and unity between the generated image and the input text.</p>
+  <h3>ControlNet Selection</h3>
+  <p>To further optimize the content consistency of the generated image, we introduce the ControlNet module. The Visual Large Language Model analyzes the style image to determine if it is 2D or 3D.</p>
+  <p><code>
+  \begin{algorithm}
+  \caption{ControlNet Type Determination}
+  \label{alg:controlnet_type}
+  \begin{algorithmic}[1]
+  \Require Dimensionality of input data (2D or 3D)
+  \Ensure ControlNet type (Tile or Depth)
+  \State is_2d = VLM(PromptTemplate_4(I_s))
+  \If{is_2d == True}
+  \State ControlNet type \leftarrow Tile
+  \Else
+  \State ControlNet type \leftarrow Depth
+  \EndIf
+  \end{algorithmic}
+  \end{algorithm>
+  </code></p>
+  <p>If the style image is identified as 3D, the Depth ControlNet is selected; if 2D, the Tile ControlNet is chosen. The corresponding ControlNet features are extracted and injected into the intermediate and up-sampling layers of the UNet. This divide-and-conquer approach ensures that different types of style images are optimally processed.</p>
+  <h3>Feature Fusion</h3>
+  <p>Finally, we merge all the extracted features to ensure consistency and coherence in the generated image. Specifically, the style features, ID features, and text features are injected into the corresponding layers of the UNet.</p>
+  <p><code>
+  \begin{equation}
+  Key(X) = W_k \cdot X
+  \end{equation}
+  <begin{equation>
+  Value(X) = W_v \cdot X
+  \end{equation}
+  <begin{equation>
+  CrossAttention(K_x, V_x) = Attention(Q, K, V) + \lambda \cdot Attention(Q, K_x, V_x)
+  \end{equation>
+  <begin{equation>
+  Z_i = CrossAttention(Key(F_i), Value(F_i)), i =\{{t,st,id,txt\}}.
+  \end{equation>
+  <begin{align>
+  \begin{cases}
+  Z_{\text{up}} &= Z_t + Z_{id} + Z_{txt},\\
+  Z_{\text{down}} &= Z_{st} + Z_{id} + Z_{txt},\\
+  Z_{\text{mid}} &= Z_{id} + Z_{txt}.
+  \end{cases}
+  \end{align>
+  </code></p>
+  <p>Through this multi-feature fusion method, we can precisely control the style, content, and annotation features in the generated images, ensuring high consistency and unity in the results.</p>
 </div>
 <div class="content">
-  <h2>Art Rendition</h2>
-  <p>Original artistic renditions of our subject dog in the style of famous painters. We remark that many of the generated poses were not seen in the training set, such as the Van Gogh and Warhol rendition. We also note that some renditions seem to have novel composition and faithfully imitate the style of the painter - even suggesting some sort of creativity (extrapolation given previous knowledge).</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/art.png" style="width:100%;"> <br>
+  <h2>Experiments</h2>
+  <h3>Implementation Details</h3>
+  <p>Our experiments were conducted on an NVIDIA A100 GPU. The CelebA-HQ dataset with 30,000 1024 × 1024 resolution images was utilized as the content data, while the AAHQ dataset contains approximately 25,000 high-quality artistic images and the Metfaces dataset consists of 1336 high-quality images from Metropolitan Museum served as the style reference data. As the task did not require training, we employed the pretrained SDXL model as the base model, incorporating TileControlNet and DepthControlNet for additional control options. The IP-Adapter in its SDXL variant was used, with PuLID as the ID encoder. For text and image encoding, we used CLIP and CLIP Vision, respectively. The image annotators employed were QwenVL-Plus and Qwen-72b-Instruct. We utilized a DDIM sampler, performing a total of 20 sampling steps per image.</p>
+  <h3>Comparison to Previous Methods</h3>
+  <h4>Qualitative Comparison</h4>
+  <img class="summary-img" src="./DreamBooth_files/comparison.png" style="width:100%;"> 
+  <p>In the figure, we present a comparative analysis of the performance of state-of-the-art face stylization methods. Our results demonstrate that ConstFS (our proposed method) achieves the best performance, effectively balancing style transfer and facial feature preservation. Methods based on StyleGAN, such as BlendGAN and JoJoGAN, successfully extract features to some extent. However, they predominantly prioritize style over content consistency, often resulting in the loss of facial information. This issue is evident in the fifth column, sixth image, which displays extraneous facial hair, and the seventh column, first image, where content erosion occurs.</p>
+  <p>The MMFS method attempts to balance style and content but still suffers from significant content deformation, leading to the loss of key facial features and expressions. This is particularly noticeable in the ninth column, first, second, and last images. InstantStyle, which is based on Stable Diffusion, exhibits excellent style consistency. However, it often encounters compatibility issues between style and content, as seen in the sixth column, fourth image, where the dominant style overshadows the content, leaving only hair color recognizable. Similarly, in the sixth column, sixth image, the facial features are almost entirely inconsistent with the original content.</p>
+  <p>PortraitDiffusion strives to balance style and content but falls short, with facial features becoming indistinguishable in the fourth column, fifth and sixth images. OSASIS excels in content preservation, yet the degree of style alteration is minimal, showing little correlation with the reference style image. Through this comparison, it is evident that ConstFS excels in both style transfer and facial feature preservation, achieving an optimal balance between the two.</p>
+  <h4>Quantitative Comparison</h4>
+  <p>We evaluate the generated results from three aspects: perception, deformation, and identity. Perception is assessed using LPIPS distance, deformation is evaluated via FID (Frechet Inception Distance), and identity is measured by CLIP-Score. The following are the evaluation results on the AAHQ and Metfaces datasets:</p>
+  <p>In Table 1, our method achieves the highest LPIPS score in perceptual evaluation, indicating superior visual diversity in the generated images compared to other methods. In terms of deformation evaluation, our method leads with the lowest FID score, demonstrating the best structural fidelity and significantly reducing deformation in the generated images. For identity evaluation, while JoJoGAN achieves a slightly higher CLIP-Score, our method still performs exceptionally well, surpassing BlendGAN and OSASIS, thus highlighting our method's effectiveness in preserving identity information.</p>
+  <p>In the Table 2, our method exhibits outstanding performance in perceptual diversity with a near-highest LPIPS score, outperforming BlendGAN and JoJoGAN. In deformation evaluation, although BlendGAN has a marginally lower FID score, our method closely follows, showcasing strong structural consistency and low deformation. In identity evaluation, our method significantly outperforms other methods with the highest CLIP-Score, indicating superior performance in maintaining identity features.</p>
 </div>
 <div class="content">
-  <h2>Text-Guided View Synthesis</h2>
-  <p>Our technique can synthesized images with specified viewpoints for a subject cat (left to right: top, bottom, side and back views). Note that the generated poses are  different from the input poses, and the background changes in a realistic manner given a pose change. We also highlight the preservation of complex fur patterns on the subject cat's forehead.</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/novel_views.png" style="width:100%;"> <br>
+  <h2>Ablation Study</h2>
+  <h3>Effect of ID Encoder</h3>
+  <img class="summary-img" src="./DreamBooth_files/ID-Encoder.png" style="width:50%;"> 
+  <p>The impact of the ID Encoder is significant. Without utilizing the ID Encoder, the stylized results generated by the method exhibit substantial discrepancies from the input faces, including content loss. This issue is particularly evident when comparing the third and fourth images in the first row, where the presence of the ID Encoder results in enhanced content consistency and more reasonable generated content.</p>
+  <h3>Effect of Style Extractor Module</h3>
+  <img class="summary-img" src="./DreamBooth_files/StyleExtractor.png" style="width:50%;"> 
+  <p>The impact of the style extractor module is evident. The absence of the style extractor module leads to images that display notable distortion and abstract effects, causing facial features to warp and hairstyles to collapse, resulting in strange and unrealistic image content. In contrast, using the style extractor module allows for more accurate capture of the target style details, making the generated images more realistic and visually appealing.</p>
+  <h3>Effect of ControlNet</h3>
+  <img class="summary-img" src="./DreamBooth_files/ControlNet.png" style="width:50%;"> 
+  <p>The influence of ControlNet is significant. The method incorporating ControlNet can more accurately capture facial edges and details while preserving the structure of the original image. This ensures that the details and overall structure of the person remain consistent and natural.</p>
+  <h3>Effect of Image Captioner</h3>
+  <img class="summary-img" src="./DreamBooth_files/ImageCaptioner.png" style="width:50%;"> 
+  <p>The impact of the Image Captioner is notable. Under the default Image Captioner guidance of "masterpiece, best quality, high quality," the generated images lack style inheritance, and certain features are not presented in the generated images. When the style image extraction Image Captioner is used for guidance, the unique characteristics of the style image are extracted, reinforcing the constraints on the content image and resulting in superior effects in the generated images.</p>
+  <h3>Prompt Guidance Scaling</h3>
+  <img class="summary-img" src="./DreamBooth_files/PromptGuidance.png" style="width:100%;"> 
+  <p>The figure illustrates the effect differences of the prompt under various guidance scale parameters, showing the changing role of the prompt on the content image. When the scale parameter is 1, the prompt guidance is weakest, preserving most details of the content image's face. As the guidance scale parameter increases, the prompt guidance strength continuously enhances, with the style image gradually taking the lead, and more unique features of the style image appearing in the generated image. At a parameter of around 5, the effect is optimal, retaining most details of the content image while effectively inheriting the style image. At a parameter of 15, the prompt strength is maximal, with the style image dominating and causing significant degradation to the content image.</p>
+  <h3>IP-Adapter Parameter Scaling</h3>
+  <img class="summary-img" src="./DreamBooth_files/IPAdapter.png" style="width:100%;"> 
+  <p>The figure demonstrates the effect of different scale parameters for the IP-Adapter, showing the varying degrees of fusion between the input image and the style image. When the scale parameter is 0, the image retains only the original features without any stylization effect. Between 0.2 and 0.6, style features gradually blend in, and the image begins to exhibit stylized effects while retaining a significant amount of original features. Between 0.8 and 1.2, style features dominate, but the fundamental features of the input image remain discernible, achieving a good balance. Between 1.4 and 2.0, style features completely override the original features, and the generated image almost entirely reflects the characteristics of the style image.</p>
+  <h3>ControlNet Conditioning Scaling</h3>
+  <img class="summary-img" src="./DreamBooth_files/ControlNetConditioning.png" style="width:100%;"> 
+  <p>The figure shows the effect differences of ControlNet under different conditioning scale parameters, reflecting the enhancement of content consistency. In the 0-0.1 range, the stylized result and the input face image differ significantly in structure, with one being a full body and the other a face. From 0.2 onwards, the stylized face shape gradually resembles the input face, with the best effect around 0.6-0.7. From 0.8 to 1.0, the facial structure of the stylized result starts to deform, resulting in poorer effects.</p>
 </div>
 <div class="content">
-  <h2>Property Modification</h2>
-  <p>We show color modifications in the first row (using prompts ``a [color] [V] car''), and crosses between a specific dog and different animals in the second row (using prompts ``a cross of a [V] dog and a [target species]''). We highlight the fact that our method preserves unique visual features that give the subject its identity or essence, while performing the required property modification.</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/property_modification.png" style="width:100%;"> <br>
-</div>
-<div class="content">
-  <h2>Accessorization</h2>
-  <p>Outfitting a dog with accessories. The identity of the subject is preserved and many different outfits or accessories can be applied to the dog given a prompt of type <em>"a [V] dog wearing a police/chef/witch outfit''</em>. We observe a realistic interaction between the subject dog and the outfits or accessories, as well as a large variety of possible options.</p>
-  <br>
-  <img class="summary-img" src="./DreamBooth_files/accessories.png" style="width:100%;"> <br>
-</div>
-<div class="content">
-  <h2>Societal Impact</h2>
-  <p>This project aims to provide users with an effective tool for synthesizing personal subjects (animals, objects) in different contexts. While general text-to-image models might be biased towards specific attributes when synthesizing images from text, our approach enables the user to get a better reconstruction of their desirable subjects. On contrary, malicious parties might try to use such images to mislead viewers. This is a common issue, existing in other generative models approaches or content manipulation techniques. Future research in generative modeling, and specifically of personalized generative priors, must continue investigating and revalidating these concerns.</p>
-  <br>
+  <h2>Conclusion and Future Work</h2>
+  <p>In this paper, we introduced ConstFS, a novel approach to facial style transfer that balances style consistency and content preservation. By leveraging controlled generation models like ControlNet and IP-Adapter, our method effectively injects style and content features into specific attention layers, preserving the layout and original content. ConstFS addresses key challenges such as style degradation and the trade-off between style intensity and content consistency through meticulous weight adjustments and optimization algorithms.</p>
+  <p>Our experimental results demonstrated that ConstFS outperforms existing methods in maintaining facial features while achieving style transfer, as evidenced by both qualitative and quantitative evaluations. The ablation studies further validated the importance of our key components, confirming their roles in enhancing style feature capture and content consistency.</p>
+  <p>Future work will focus on expanding the applicability of our method to other domains of image processing, such as general image-to-image translation and knowledge distillation. Additionally, we aim to explore recommendations for suitable style images and weight vectors to improve ease of use and address data bias through data augmentation.</p>
 </div>
 <div class="content">
   <h2>BibTex</h2>
@@ -90,7 +182,6 @@
 <div class="content" id="acknowledgements">
   <p><strong>Acknowledgements</strong>:
     We thank Rinon Gal, Adi Zicher, Ron Mokady, Bill Freeman, Dilip Krishnan, Huiwen Chang and Daniel Cohen-Or for their valuable inputs that helped improve this work, and to Mohammad Norouzi, Chitwan Saharia and William Chan for providing us with their support and the pretrained models of Imagen. Finally, a special thank you to David Salesin for his feedback, advice and for his support for the project.
-    <!-- Recycling a familiar <a href="https://chail.github.io/latent-composition/">template</a> ;). --> 
   </p>
 </div>
 </body>
